@@ -11,18 +11,20 @@ import java.nio.file.*;
 public class DSLPreviewApp extends Application {
 
     private static final Path HTML_PATH = Path.of("output/HomePage.html");
+    private static final Path DSL_PATH = Path.of("dsl/models/HomePage.ui");
     private WebView webView;
 
     @Override
     public void start(Stage stage) throws Exception {
         webView = new WebView();
+        runMontiCoreParser();
         loadHtml();
 
         stage.setTitle("DSL Live Preview");
         stage.setScene(new Scene(webView, 800, 600));
         stage.show();
 
-        watchHtmlChanges();
+        watchDslChanges();
     }
 
     private void loadHtml() {
@@ -34,9 +36,23 @@ public class DSLPreviewApp extends Application {
         }
     }
 
-    private void watchHtmlChanges() throws IOException {
+    private void runMontiCoreParser() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                "java", "-jar", "src/tools/monticore-cli.jar",
+                "-g", "dsl/grammars/FrontendDSL.mc4",
+                "-i", DSL_PATH.toString(),
+                "-o", HTML_PATH.toString()
+            );
+            pb.inheritIO().start().waitFor();
+        } catch (Exception e) {
+            System.err.println("Failed to run MontiCore parser: " + e.getMessage());
+        }
+    }
+
+    private void watchDslChanges() throws IOException {
         WatchService watchService = FileSystems.getDefault().newWatchService();
-        Path dir = HTML_PATH.getParent();
+        Path dir = DSL_PATH.getParent();
         dir.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
 
         Thread watcherThread = new Thread(() -> {
@@ -45,8 +61,9 @@ public class DSLPreviewApp extends Application {
                     WatchKey key = watchService.take();
                     for (WatchEvent<?> event : key.pollEvents()) {
                         Path changed = dir.resolve((Path) event.context());
-                        if (changed.endsWith(HTML_PATH.getFileName())) {
-                            Thread.sleep(100); // slight delay for file write completion
+                        if (changed.endsWith(DSL_PATH.getFileName())) {
+                            Thread.sleep(200); // allow write to finish
+                            runMontiCoreParser();
                             javafx.application.Platform.runLater(this::loadHtml);
                         }
                     }
@@ -62,4 +79,4 @@ public class DSLPreviewApp extends Application {
     public static void main(String[] args) {
         launch();
     }
-} 
+}
