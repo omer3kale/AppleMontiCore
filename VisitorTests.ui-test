@@ -1,0 +1,12 @@
+tests {
+  visit Text {
+    assertEquals($0.value, "Welcome")
+    assertNil($0.annotation)
+  }
+
+  visit Button {
+    assert($0.label.contains("Click"))
+    assertGreater($0.size, 3)
+    assertEmpty($0.tags)
+  }
+}
