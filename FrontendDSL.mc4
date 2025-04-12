@@ -1,0 +1,13 @@
+grammar FrontendDSL {
+
+  UI = "View" "{" UIElement* "}";
+
+  UIElement = VStack | Text | Button;
+
+  VStack = "VStack" "{" UIElement* "}";
+  Text = "Text" "(" STRING ")";
+  Button = "Button" "(" STRING ")" Action?;
+
+  Action = "{" "action" "=" STRING "}";
+
+}
