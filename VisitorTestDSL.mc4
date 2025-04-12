@@ -6,7 +6,9 @@ grammar VisitorTestDSL {
 
   Setup = "setup" "{" SetupLine* "}";
 
-  SetupLine = FieldRef "=" STRING ";";
+  SetupLine = FieldRef "=" Value ";";
+
+  Value = STRING | NUMBER | DOUBLE;
 
   TypeName = /[A-Za-z_][A-Za-z0-9_]*/;
 
@@ -25,5 +27,6 @@ grammar VisitorTestDSL {
   FieldRef = "$0" "." FieldName;
   FieldName = /[a-zA-Z_][a-zA-Z0-9_]*/;
   NUMBER = /[0-9]+/;
+  DOUBLE = /[0-9]+\.[0-9]+/;
 
 }
