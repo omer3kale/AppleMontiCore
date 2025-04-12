@@ -1,6 +1,8 @@
 grammar ViewDSL {
 
-  ViewFile = "views" "{" ThemeDef? ViewDef* "}";
+  ViewFile = "views" "{" ImportStmt* ThemeDef? ViewDef* "}";
+
+  ImportStmt = "include" Name ";";
 
   ThemeDef = "theme" "{" ThemeSetting* "}";
   ThemeSetting = "font" "=" STRING ";"
@@ -18,7 +20,7 @@ grammar ViewDSL {
   StateVar = Name ":" TypeName ("=" DefaultExpr)? ";";
   DefaultExpr = STRING | NUMBER | BOOLEAN;
 
-  Component = VStack | HStack | Text | TextField | Button | Image | NavigationLink | HtmlElement | HtmlVoid;
+  Component = VStack | HStack | Text | TextField | Button | Image | NavigationLink | HtmlElement | HtmlVoid | IncludeView;
 
   VStack = "VStack" "{" Component* "}";
   HStack = "HStack" "{" Component* "}";
@@ -35,6 +37,8 @@ grammar ViewDSL {
 
   HtmlElement = "Html" TagName HtmlAttrs? HtmlContent? "end";
   HtmlVoid = "HtmlSelfClosing" TagName HtmlAttrs? ";";
+
+  IncludeView = "include" Name ";";
 
   TagName = /[a-z][a-z0-9]*/;
   HtmlAttrs = "attributes" "{" HtmlAttr* "}";
