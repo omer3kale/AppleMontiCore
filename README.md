@@ -56,3 +56,15 @@ View HomePage attributes {
   }
 }
 ...is exactly what MontiCore is designed for — to turn declarative UI logic into code-generation-ready ASTs.
+
+
+🧠 What You Can Build With This
+✅ One .dsl file → outputs:
+
+✅ .jsx component (React, Vue, etc.)
+
+✅ route registration (Router.jsx)
+
+✅ useState + onChange bindings
+
+✅ Custom HTML (buttons, input, etc.)
