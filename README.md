@@ -33,3 +33,9 @@ You now have:
 ✅ Output: .json or .strings
 
 ✅ Swift: Structured, UI-ready
+
+
+✅ Write and validate .tra DSLs
+✅ Auto-generate Swift code from them
+✅ Run everything in one command
+✅ Edit in VS Code with live feedback
