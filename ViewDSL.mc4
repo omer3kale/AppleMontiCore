@@ -7,7 +7,12 @@ grammar ViewDSL {
                | "color" "=" STRING ";"
                | "accent" "=" STRING ";";
 
-  ViewDef = "View" Name "{" Component* "}";
+  ViewDef = "View" Name ViewAttrs? "{" Component* "}";
+
+  ViewAttrs = "attributes" "{" ViewAttr* "}";
+  ViewAttr = "title" "=" STRING ";"
+           | "route" "=" STRING ";"
+           | "layout" "=" STRING ";";
 
   Component = VStack | HStack | Text | TextField | Button | Image | NavigationLink;
 
