@@ -9,9 +9,18 @@ public class ViewToJSXExporter {
   public static String exportView(ASTViewDef view) {
     StringBuilder sb = new StringBuilder();
     sb.append("import React, { useState } from 'react';\n\n");
-    sb.append("export default function ").append(view.getName()).append("() {\n");
+    sb.append("export default function ").append(view.getName()).append("(");
 
-    // state declarations
+    if (view.isPresentPropDef() && !view.getPropDef().getPropVarList().isEmpty()) {
+      sb.append("{ ");
+      List<String> props = new ArrayList<>();
+      for (ASTPropVar p : view.getPropDef().getPropVarList()) {
+        props.add(p.getName());
+      }
+      sb.append(String.join(", ", props)).append(" }");
+    }
+    sb.append(") {\n");
+
     if (view.isPresentStateDef()) {
       for (ASTStateVar v : view.getStateDef().getStateVarList()) {
         String var = v.getName();
@@ -67,7 +76,7 @@ public class ViewToJSXExporter {
     }
     sb.append(">");
     if (element.isPresentHtmlContent()) {
-      sb.append(element.getHtmlContent().getSTRING());
+      sb.append(unwrapBindings(element.getHtmlContent().getSTRING()));
     }
     sb.append("</").append(element.getTagName()).append(">");
     return sb.toString();
