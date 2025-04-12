@@ -25,8 +25,8 @@ public class ViewToJSXExporter {
     if (comp instanceof ASTHtmlVoid v) return toJSX(v);
     if (comp instanceof ASTText t) return "<p>" + t.getSTRING() + "</p>";
     if (comp instanceof ASTImage i) return "<img src=\"" + i.getSTRINGList().get(0) + "\" alt=\"" + i.getSTRINGList().get(1) + "\" />";
-    if (comp instanceof ASTButton b) return "<button onClick={() => " + b.getActionBlock().getSTRING() + "}>" + b.getSTRING() + "</button>";
-    if (comp instanceof ASTTextField tf) return "<input name=\"" + tf.getName() + "\" placeholder=\"" + tf.getSTRING() + "\" />";
+    if (comp instanceof ASTButton b) return "<button onClick={() => " + cleanExpr(b.getActionBlock().getSTRING()) + "}>" + b.getSTRING() + "</button>";
+    if (comp instanceof ASTTextField tf) return "<input name=\"" + tf.getName() + "\" placeholder=\"" + tf.getSTRING() + "\" value={" + tf.getName() + "} onChange={e => set" + capitalize(tf.getName()) + "(e.target.value)} />";
     if (comp instanceof ASTNavigationLink nl) return "<a href=\"" + nl.getTarget() + "\">" + nl.getLabel() + "</a>";
     if (comp instanceof ASTVStack vs) return wrapBlock("div", "flex flex-col gap-2", vs.getComponentList());
     if (comp instanceof ASTHStack hs) return wrapBlock("div", "flex flex-row gap-2", hs.getComponentList());
@@ -48,7 +48,12 @@ public class ViewToJSXExporter {
     sb.append("<").append(element.getTagName());
     if (element.isPresentHtmlAttrs()) {
       for (ASTHtmlAttr attr : element.getHtmlAttrs().getHtmlAttrList()) {
-        sb.append(" ").append(attr.getName()).append("=\"").append(attr.getSTRING()).append("\"");
+        String val = attr.getSTRING();
+        if (isExpr(val)) {
+          sb.append(" ").append(attr.getName()).append("={").append(cleanExpr(val)).append("}");
+        } else {
+          sb.append(" ").append(attr.getName()).append("=\"").append(val).append("\"");
+        }
       }
     }
     sb.append(">");
@@ -64,10 +69,27 @@ public class ViewToJSXExporter {
     sb.append("<").append(element.getTagName());
     if (element.isPresentHtmlAttrs()) {
       for (ASTHtmlAttr attr : element.getHtmlAttrs().getHtmlAttrList()) {
-        sb.append(" ").append(attr.getName()).append("=\"").append(attr.getSTRING()).append("\"");
+        String val = attr.getSTRING();
+        if (isExpr(val)) {
+          sb.append(" ").append(attr.getName()).append("={").append(cleanExpr(val)).append("}");
+        } else {
+          sb.append(" ").append(attr.getName()).append("=\"").append(val).append("\"");
+        }
       }
     }
     sb.append(" />");
     return sb.toString();
+  }
+
+  private static boolean isExpr(String value) {
+    return value != null && value.startsWith("{{") && value.endsWith("}}");
+  }
+
+  private static String cleanExpr(String expr) {
+    return expr.replaceAll("^\\{\\{", "").replaceAll("\\}\}$", "");
+  }
+
+  private static String capitalize(String s) {
+    return Character.toUpperCase(s.charAt(0)) + s.substring(1);
   }
 }
