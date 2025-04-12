@@ -39,3 +39,20 @@ You now have:
 ✅ Auto-generate Swift code from them
 ✅ Run everything in one command
 ✅ Edit in VS Code with live feedback
+
+✅ Yes — you're on the right track. Defining DSL syntax like:
+
+plaintext
+
+View HomePage attributes {
+  route = "/home";
+} state {
+  name: String;
+  count: Number;
+} {
+  VStack {
+    TextField(name: name, placeholder: "Enter your name")
+    Text("Welcome {{name}}")
+  }
+}
+...is exactly what MontiCore is designed for — to turn declarative UI logic into code-generation-ready ASTs.
