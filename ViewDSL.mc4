@@ -7,14 +7,17 @@ grammar ViewDSL {
                | "color" "=" STRING ";"
                | "accent" "=" STRING ";";
 
-  ViewDef = "View" Name ViewAttrs? "{" Component* "}";
+  ViewDef = "View" Name ViewAttrs? StateDef? "{" Component* "}";
 
   ViewAttrs = "attributes" "{" ViewAttr* "}";
   ViewAttr = "title" "=" STRING ";"
            | "route" "=" STRING ";"
            | "layout" "=" STRING ";";
 
-  Component = VStack | HStack | Text | TextField | Button | Image | NavigationLink | HtmlElement;
+  StateDef = "state" "{" StateVar* "}";
+  StateVar = Name ":" TypeName ";";
+
+  Component = VStack | HStack | Text | TextField | Button | Image | NavigationLink | HtmlElement | HtmlVoid;
 
   VStack = "VStack" "{" Component* "}";
   HStack = "HStack" "{" Component* "}";
@@ -30,12 +33,15 @@ grammar ViewDSL {
   NavigationLink = "NavigationLink" "(" "label:" STRING "," "target:" Name ")";
 
   HtmlElement = "Html" TagName HtmlAttrs? HtmlContent? "end";
+  HtmlVoid = "HtmlSelfClosing" TagName HtmlAttrs? ";";
+
   TagName = /[a-z][a-z0-9]*/;
   HtmlAttrs = "attributes" "{" HtmlAttr* "}";
   HtmlAttr = Name "=" STRING ";";
   HtmlContent = "content" "=" STRING ";";
 
   Name = /[a-zA-Z_][a-zA-Z0-9_]*/;
+  TypeName = /[A-Z][a-zA-Z0-9_]*/;
   STRING = /"[^"\\]*(\\.[^"\\]*)*"/;
 
 }
