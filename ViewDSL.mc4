@@ -12,12 +12,15 @@ grammar ViewDSL {
                | "color" "=" STRING ";"
                | "accent" "=" STRING ";";
 
-  ViewDef = "View" Name ViewAttrs? StateDef? "{" Component* "}";
+  ViewDef = "View" Name ViewAttrs? PropDef? StateDef? "{" Component* "}";
 
   ViewAttrs = "attributes" "{" ViewAttr* "}";
   ViewAttr = "title" "=" STRING ";"
            | "route" "=" STRING ";"
            | "layout" "=" STRING ";";
+
+  PropDef = "props" "{" PropVar* "}";
+  PropVar = Name ":" TypeName ";";
 
   StateDef = "state" "{" StateVar* "}";
   StateVar = Name ":" TypeName ("=" DefaultExpr)? ";";
