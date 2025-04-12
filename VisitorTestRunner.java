@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class VisitorTestRunner {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         if (args.length == 0) {
             System.out.println("Usage: java VisitorTestRunner <file.ui-test>");
             return;
@@ -33,14 +33,36 @@ public class VisitorTestRunner {
         String javaTest = SwiftStyleTestExporter.exportJUnit(ast);
         String swiftTest = SwiftStyleTestExporter.exportSwiftTest(ast);
 
-        Path javaOut = Paths.get("output/GeneratedVisitorTests.java");
-        Path swiftOut = Paths.get("output/VisitorTests.swift");
-        Files.createDirectories(javaOut.getParent());
+        Path outputDir = Paths.get("output");
+        Path javaOut = outputDir.resolve("GeneratedVisitorTests.java");
+        Path swiftOut = outputDir.resolve("VisitorTests.swift");
+
+        Files.createDirectories(outputDir);
         Files.writeString(javaOut, javaTest);
         Files.writeString(swiftOut, swiftTest);
 
         System.out.println("✅ Generated:");
         System.out.println("- " + javaOut.toAbsolutePath());
         System.out.println("- " + swiftOut.toAbsolutePath());
+
+        // Compile the Java test file
+        System.out.println("🛠️ Compiling Java test...");
+        Process compile = new ProcessBuilder("javac", javaOut.toString())
+            .inheritIO()
+            .start();
+        compile.waitFor();
+
+        // Run test using junit-platform-console if available
+        if (Files.exists(Paths.get("output/GeneratedVisitorTests.class"))) {
+            System.out.println("🚀 Running tests:");
+            new ProcessBuilder("java", "-cp", "output:.", "org.junit.platform.console.ConsoleLauncher",
+                    "--scan-classpath", "output",
+                    "--include-classname", ".*GeneratedVisitorTests")
+                .inheritIO()
+                .start()
+                .waitFor();
+        } else {
+            System.out.println("⚠️ Skipped test run (class not found)");
+        }
     }
 }
