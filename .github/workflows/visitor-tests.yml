@@ -1,0 +1,38 @@
+name: Run Visitor DSL Tests
+
+on:
+  push:
+    paths:
+      - '**.ui-test'
+      - '**VisitorTest*'
+  workflow_dispatch:
+
+jobs:
+  visitor-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧾 Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 📦 Build MontiCore Parser
+        run: |
+          mvn clean install -DskipTests
+
+      - name: 🧪 Run Visitor Test Runner
+        run: |
+          mkdir -p output
+          javac -cp target/classes -d output src/main/java/de/yourdomain/testing/VisitorTestRunner.java
+          java -cp target/classes:output de.yourdomain.testing.VisitorTestRunner ui-tests/
+
+      - name: 📤 Upload Outputs
+        uses: actions/upload-artifact@v3
+        with:
+          name: visitor-test-artifacts
+          path: output/
