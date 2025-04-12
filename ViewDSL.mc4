@@ -14,7 +14,7 @@ grammar ViewDSL {
            | "route" "=" STRING ";"
            | "layout" "=" STRING ";";
 
-  Component = VStack | HStack | Text | TextField | Button | Image | NavigationLink;
+  Component = VStack | HStack | Text | TextField | Button | Image | NavigationLink | HtmlElement;
 
   VStack = "VStack" "{" Component* "}";
   HStack = "HStack" "{" Component* "}";
@@ -28,6 +28,12 @@ grammar ViewDSL {
   Image = "Image" "(" "src:" STRING "," "alt:" STRING ")";
 
   NavigationLink = "NavigationLink" "(" "label:" STRING "," "target:" Name ")";
+
+  HtmlElement = "Html" TagName HtmlAttrs? HtmlContent? "end";
+  TagName = /[a-z][a-z0-9]*/;
+  HtmlAttrs = "attributes" "{" HtmlAttr* "}";
+  HtmlAttr = Name "=" STRING ";";
+  HtmlContent = "content" "=" STRING ";";
 
   Name = /[a-zA-Z_][a-zA-Z0-9_]*/;
   STRING = /"[^"\\]*(\\.[^"\\]*)*"/;
