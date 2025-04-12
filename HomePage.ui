@@ -1,0 +1,8 @@
+View {
+  VStack {
+    Text("Welcome to my page")
+    Button("Click me") {
+      action = "alert('Hello!')"
+    }
+  }
+}
