@@ -1,0 +1,28 @@
+grammar SwiftStyleDSL {
+
+  SwiftMethodFile = "methods" "{" SwiftMethod* "}";
+
+  SwiftMethod = "func" MethodName "(" Parameters? ")" ReturnType? Body;
+
+  Parameters = Parameter ("," Parameter)*;
+  Parameter = TypeName Identifier;
+
+  ReturnType = "->" TypeName;
+
+  Body = "{" Statement* "}";
+
+  Statement = ReturnStmt | CallStmt | DeclarationStmt;
+
+  ReturnStmt = "return" Expression ";";
+  CallStmt = Identifier "(" (Expression ("," Expression)*)? ")" ";";
+  DeclarationStmt = TypeName Identifier "=" Expression ";";
+
+  Expression = Literal | Identifier | BoolExpr;
+
+  BoolExpr = Identifier "==" Literal | Identifier "!=" Literal;
+
+  TypeName = /[A-Z][a-zA-Z0-9_]*/;
+  Identifier = /[a-z][a-zA-Z0-9_]*/;
+  Literal = /"[^"]*"/ | /[0-9]+/ | "true" | "false";
+
+}
