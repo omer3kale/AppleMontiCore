@@ -15,8 +15,8 @@ public class ViewToJSXExporter {
     if (view.isPresentStateDef()) {
       for (ASTStateVar v : view.getStateDef().getStateVarList()) {
         String var = v.getName();
-        sb.append("  const [").append(var).append(", set").append(capitalize(var)).append("] = useState(");
-        sb.append(defaultFor(v.getTypeName())).append(");\n");
+        String def = defaultFor(v);
+        sb.append("  const [").append(var).append(", set").append(capitalize(var)).append("] = useState(").append(def).append(");\n");
       }
       sb.append("\n");
     }
@@ -102,8 +102,13 @@ public class ViewToJSXExporter {
     return text.replaceAll("\\{\\{([^}]*)}}", "{$1}");
   }
 
-  private static String defaultFor(String typeName) {
-    return switch (typeName) {
+  private static String defaultFor(ASTStateVar v) {
+    if (v.isPresentDefaultExpr()) {
+      if (v.getDefaultExpr().isPresentSTRING()) return v.getDefaultExpr().getSTRING();
+      if (v.getDefaultExpr().isPresentNUMBER()) return v.getDefaultExpr().getNUMBER();
+      if (v.getDefaultExpr().isPresentBOOLEAN()) return v.getDefaultExpr().getBOOLEAN();
+    }
+    return switch (v.getTypeName()) {
       case "String" -> "\"\"";
       case "Number" -> "0";
       case "Boolean" -> "false";
