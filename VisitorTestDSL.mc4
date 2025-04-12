@@ -6,13 +6,20 @@ grammar VisitorTestDSL {
 
   TypeName = /[A-Za-z_][A-Za-z0-9_]*/;
 
-  Assertion = Equals | Contains;
+  Assertion = Equals | Contains | Empty | Nil | Greater;
 
   Equals = "assertEquals(" FieldRef "," STRING ")";
 
   Contains = "assert(" FieldRef ".contains(" STRING "))";
 
+  Empty = "assertEmpty(" FieldRef ")";
+
+  Nil = "assertNil(" FieldRef ")";
+
+  Greater = "assertGreater(" FieldRef "," NUMBER ")";
+
   FieldRef = "$0" "." FieldName;
   FieldName = /[a-zA-Z_][a-zA-Z0-9_]*/;
+  NUMBER = /[0-9]+/;
 
 }
