@@ -5,6 +5,9 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextInputControl;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
@@ -19,28 +22,61 @@ public class DSLPreviewApp extends Application {
 
     private WebView webView;
     private TextArea errorViewer;
+    private TextArea dslEditor;
 
     @Override
     public void start(Stage stage) throws Exception {
         webView = new WebView();
+
+        dslEditor = new TextArea();
+        dslEditor.setStyle("-fx-font-family: monospace;");
+        dslEditor.setWrapText(true);
+        dslEditor.setPrefWidth(400);
+        loadDSLSource();
+
         errorViewer = new TextArea();
         errorViewer.setEditable(false);
         errorViewer.setStyle("-fx-font-family: monospace;");
 
+        SplitPane rightPane = new SplitPane();
+        rightPane.setOrientation(javafx.geometry.Orientation.VERTICAL);
+        rightPane.getItems().addAll(webView, errorViewer);
+        rightPane.setDividerPositions(0.75);
+
+        SplitPane rootPane = new SplitPane();
+        rootPane.getItems().addAll(dslEditor, rightPane);
+        rootPane.setDividerPositions(0.35);
+        rootPane.setPadding(new Insets(10));
+
+        dslEditor.textProperty().addListener((obs, oldText, newText) -> saveDSLAndUpdate());
+
+        stage.setTitle("DSL Editor + Live Preview + Errors");
+        stage.setScene(new Scene(rootPane, 1200, 700));
+        stage.show();
+
         runMontiCoreParser();
         loadHtml();
         loadErrors();
+    }
 
-        SplitPane splitPane = new SplitPane();
-        splitPane.getItems().addAll(webView, errorViewer);
-        splitPane.setDividerPositions(0.7);
-        splitPane.setPadding(new Insets(10));
+    private void loadDSLSource() {
+        try {
+            String code = Files.readString(DSL_PATH);
+            dslEditor.setText(code);
+        } catch (IOException e) {
+            dslEditor.setText("View {\n  VStack {\n    Text(\"Hello\")\n  }\n}\n");
+        }
+    }
 
-        stage.setTitle("DSL Live Preview + Errors");
-        stage.setScene(new Scene(splitPane, 1000, 600));
-        stage.show();
-
-        watchDslChanges();
+    private void saveDSLAndUpdate() {
+        try {
+            Files.writeString(DSL_PATH, dslEditor.getText());
+            runMontiCoreParser();
+            loadHtml();
+            loadErrors();
+        } catch (IOException e) {
+            errorViewer.setText("❌ Failed to write .ui file: " + e.getMessage());
+        }
     }
 
     private void loadHtml() {
@@ -73,35 +109,6 @@ public class DSLPreviewApp extends Application {
         } catch (Exception e) {
             System.err.println("Failed to run MontiCore parser: " + e.getMessage());
         }
-    }
-
-    private void watchDslChanges() throws IOException {
-        WatchService watchService = FileSystems.getDefault().newWatchService();
-        Path dir = DSL_PATH.getParent();
-        dir.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
-
-        Thread watcherThread = new Thread(() -> {
-            while (true) {
-                try {
-                    WatchKey key = watchService.take();
-                    for (WatchEvent<?> event : key.pollEvents()) {
-                        Path changed = dir.resolve((Path) event.context());
-                        if (changed.endsWith(DSL_PATH.getFileName())) {
-                            Thread.sleep(200); // allow write to finish
-                            runMontiCoreParser();
-                            javafx.application.Platform.runLater(() -> {
-                                loadHtml();
-                                loadErrors();
-                            });
-                        }
-                    }
-                    key.reset();
-                } catch (Exception ignored) {
-                }
-            }
-        });
-        watcherThread.setDaemon(true);
-        watcherThread.start();
     }
 
     public static void main(String[] args) {
