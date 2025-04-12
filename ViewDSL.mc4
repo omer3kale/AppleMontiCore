@@ -1,6 +1,11 @@
 grammar ViewDSL {
 
-  ViewFile = "views" "{" ViewDef* "}";
+  ViewFile = "views" "{" ThemeDef? ViewDef* "}";
+
+  ThemeDef = "theme" "{" ThemeSetting* "}";
+  ThemeSetting = "font" "=" STRING ";"
+               | "color" "=" STRING ";"
+               | "accent" "=" STRING ";";
 
   ViewDef = "View" Name "{" Component* "}";
 
