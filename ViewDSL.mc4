@@ -2,7 +2,10 @@ grammar ViewDSL {
 
   ViewFile = "views" "{" ImportStmt* ThemeDef? ViewDef* "}";
 
-  ImportStmt = "include" Name ";";
+  ImportStmt = "include" Name ParamBlock? ";";
+  ParamBlock = "(" ParamList? ")";
+  ParamList = Param ("," Param)*;
+  Param = Name "=" (STRING | NUMBER | BOOLEAN);
 
   ThemeDef = "theme" "{" ThemeSetting* "}";
   ThemeSetting = "font" "=" STRING ";"
@@ -38,7 +41,7 @@ grammar ViewDSL {
   HtmlElement = "Html" TagName HtmlAttrs? HtmlContent? "end";
   HtmlVoid = "HtmlSelfClosing" TagName HtmlAttrs? ";";
 
-  IncludeView = "include" Name ";";
+  IncludeView = "include" Name ParamBlock? ";";
 
   TagName = /[a-z][a-z0-9]*/;
   HtmlAttrs = "attributes" "{" HtmlAttr* "}";
