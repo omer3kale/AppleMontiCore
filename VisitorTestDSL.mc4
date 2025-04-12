@@ -2,7 +2,11 @@ grammar VisitorTestDSL {
 
   VisitorTestFile = "tests" "{" VisitorTest* "}";
 
-  VisitorTest = "visit" TypeName "{" Assertion* "}";
+  VisitorTest = "visit" TypeName Setup? "{" Assertion* "}";
+
+  Setup = "setup" "{" SetupLine* "}";
+
+  SetupLine = FieldRef "=" STRING ";";
 
   TypeName = /[A-Za-z_][A-Za-z0-9_]*/;
 
