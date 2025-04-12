@@ -50,23 +50,31 @@ public class SwiftStyleTestExporter {
     }
 
     private static String toJavaAssertion(ASTAssertion a) {
-        if (a instanceof ASTEquals) {
-            ASTEquals eq = (ASTEquals) a;
+        if (a instanceof ASTEquals eq) {
             return "assertEquals(\"" + eq.getSTRING() + "\", node.get" + capitalize(eq.getFieldRef().getFieldName()) + "());";
-        } else if (a instanceof ASTContains) {
-            ASTContains c = (ASTContains) a;
+        } else if (a instanceof ASTContains c) {
             return "assertTrue(node.get" + capitalize(c.getFieldRef().getFieldName()) + "().contains(\"" + c.getSTRING() + "\"));";
+        } else if (a instanceof ASTEmpty em) {
+            return "assertTrue(node.get" + capitalize(em.getFieldRef().getFieldName()) + "().isEmpty());";
+        } else if (a instanceof ASTNil nil) {
+            return "assertNull(node.get" + capitalize(nil.getFieldRef().getFieldName()) + "());";
+        } else if (a instanceof ASTGreater gr) {
+            return "assertTrue(node.get" + capitalize(gr.getFieldRef().getFieldName()) + "() > " + gr.getNumber() + ");";
         }
         return "// unsupported assertion";
     }
 
     private static String toSwiftAssertion(ASTAssertion a) {
-        if (a instanceof ASTEquals) {
-            ASTEquals eq = (ASTEquals) a;
+        if (a instanceof ASTEquals eq) {
             return "XCTAssertEqual(node." + eq.getFieldRef().getFieldName() + ", \"" + eq.getSTRING() + "\")";
-        } else if (a instanceof ASTContains) {
-            ASTContains c = (ASTContains) a;
+        } else if (a instanceof ASTContains c) {
             return "XCTAssertTrue(node." + c.getFieldRef().getFieldName() + ".contains(\"" + c.getSTRING() + "\"))";
+        } else if (a instanceof ASTEmpty em) {
+            return "XCTAssertTrue(node." + em.getFieldRef().getFieldName() + ".isEmpty)";
+        } else if (a instanceof ASTNil nil) {
+            return "XCTAssertNil(node." + nil.getFieldRef().getFieldName() + ")";
+        } else if (a instanceof ASTGreater gr) {
+            return "XCTAssertTrue(node." + gr.getFieldRef().getFieldName() + " > " + gr.getNumber() + ")";
         }
         return "// unsupported assertion";
     }
