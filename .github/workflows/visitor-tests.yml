@@ -1,18 +1,19 @@
-name: Run Visitor DSL Tests
+name: Generate and Sync Visitor Tests
 
 on:
   push:
     paths:
       - '**.ui-test'
-      - '**VisitorTest*'
+      - '**.mc4'
+      - '**/VisitorTest*'
   workflow_dispatch:
 
 jobs:
-  visitor-tests:
+  build-and-generate-tests:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🧾 Checkout Repo
+      - name: ⬇️ Checkout Repo
         uses: actions/checkout@v3
 
       - name: ☕ Setup Java
@@ -21,18 +22,42 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 📦 Build MontiCore Parser
-        run: |
-          mvn clean install -DskipTests
+      - name: 🧱 Build DSL Parser (MontiCore)
+        run: mvn clean install -DskipTests
 
-      - name: 🧪 Run Visitor Test Runner
+      - name: 🧪 Run VisitorTestRunner
         run: |
           mkdir -p output
           javac -cp target/classes -d output src/main/java/de/yourdomain/testing/VisitorTestRunner.java
           java -cp target/classes:output de.yourdomain.testing.VisitorTestRunner ui-tests/
 
-      - name: 📤 Upload Outputs
+      - name: 📁 Copy .swift to iOS Test Target
+        run: |
+          mkdir -p ios-app/Tests/VisitorTests/
+          cp output/*Tests.swift ios-app/Tests/VisitorTests/
+
+      - name: 📦 Upload Test Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: visitor-test-artifacts
+          name: generated-tests
           path: output/
+
+  deploy-pages:
+    runs-on: ubuntu-latest
+    needs: build-and-generate-tests
+
+    steps:
+      - name: ⬇️ Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: 📥 Download Generated Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: generated-tests
+          path: output/
+
+      - name: 🚀 Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: output/
