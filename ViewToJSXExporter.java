@@ -8,14 +8,23 @@ public class ViewToJSXExporter {
 
   public static String exportView(ASTViewDef view) {
     StringBuilder sb = new StringBuilder();
-    sb.append("import React from 'react';\n\n");
+    sb.append("import React, { useState } from 'react';\n\n");
     sb.append("export default function ").append(view.getName()).append("() {\n");
-    sb.append("  return (\n    <div>\n");
 
+    // state declarations
+    if (view.isPresentStateDef()) {
+      for (ASTStateVar v : view.getStateDef().getStateVarList()) {
+        String var = v.getName();
+        sb.append("  const [").append(var).append(", set").append(capitalize(var)).append("] = useState(");
+        sb.append(defaultFor(v.getTypeName())).append(");\n");
+      }
+      sb.append("\n");
+    }
+
+    sb.append("  return (\n    <div>\n");
     for (ASTComponent comp : view.getComponentList()) {
       sb.append("      ").append(exportComponent(comp)).append("\n");
     }
-
     sb.append("    </div>\n  );\n}\n");
     return sb.toString();
   }
@@ -23,7 +32,7 @@ public class ViewToJSXExporter {
   public static String exportComponent(ASTComponent comp) {
     if (comp instanceof ASTHtmlElement e) return toJSX(e);
     if (comp instanceof ASTHtmlVoid v) return toJSX(v);
-    if (comp instanceof ASTText t) return "<p>" + t.getSTRING() + "</p>";
+    if (comp instanceof ASTText t) return "<p>{" + unwrapBindings(t.getSTRING()) + "}</p>";
     if (comp instanceof ASTImage i) return "<img src=\"" + i.getSTRINGList().get(0) + "\" alt=\"" + i.getSTRINGList().get(1) + "\" />";
     if (comp instanceof ASTButton b) return "<button onClick={() => " + cleanExpr(b.getActionBlock().getSTRING()) + "}>" + b.getSTRING() + "</button>";
     if (comp instanceof ASTTextField tf) return "<input name=\"" + tf.getName() + "\" placeholder=\"" + tf.getSTRING() + "\" value={" + tf.getName() + "} onChange={e => set" + capitalize(tf.getName()) + "(e.target.value)} />";
@@ -87,6 +96,19 @@ public class ViewToJSXExporter {
 
   private static String cleanExpr(String expr) {
     return expr.replaceAll("^\\{\\{", "").replaceAll("\\}\}$", "");
+  }
+
+  private static String unwrapBindings(String text) {
+    return text.replaceAll("\\{\\{([^}]*)}}", "{$1}");
+  }
+
+  private static String defaultFor(String typeName) {
+    return switch (typeName) {
+      case "String" -> "\"\"";
+      case "Number" -> "0";
+      case "Boolean" -> "false";
+      default -> "null";
+    };
   }
 
   private static String capitalize(String s) {
