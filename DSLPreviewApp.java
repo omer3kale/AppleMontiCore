@@ -3,40 +3,46 @@ package de.yourdomain.preview;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextInputControl;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.*;
 
 public class DSLPreviewApp extends Application {
 
-    private static final Path HTML_PATH = Path.of("output/HomePage.html");
-    private static final Path DSL_PATH = Path.of("dsl/models/HomePage.ui");
+    private static final String[] PAGES = {"HomePage", "Contact"};
+    private static final Path DSL_DIR = Path.of("dsl/models/");
+    private static final Path HTML_DIR = Path.of("output/");
     private static final Path ERRORS_PATH = Path.of("output/ValidationErrors.swift");
 
+    private final Map<String, TextArea> dslEditors = new HashMap<>();
     private WebView webView;
     private TextArea errorViewer;
-    private TextArea dslEditor;
+    private TabPane editorTabs;
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         webView = new WebView();
-
-        dslEditor = new TextArea();
-        dslEditor.setStyle("-fx-font-family: monospace;");
-        dslEditor.setWrapText(true);
-        dslEditor.setPrefWidth(400);
-        loadDSLSource();
-
         errorViewer = new TextArea();
         errorViewer.setEditable(false);
         errorViewer.setStyle("-fx-font-family: monospace;");
+
+        editorTabs = new TabPane();
+        for (String page : PAGES) {
+            TextArea editor = new TextArea();
+            editor.setStyle("-fx-font-family: monospace;");
+            editor.setWrapText(true);
+            editor.setPrefWidth(400);
+            dslEditors.put(page, editor);
+            loadDSLSource(page);
+            Tab tab = new Tab(page, editor);
+            editorTabs.getTabs().add(tab);
+
+            editor.textProperty().addListener((obs, oldText, newText) -> saveDSLAndUpdate(page));
+        }
 
         SplitPane rightPane = new SplitPane();
         rightPane.setOrientation(javafx.geometry.Orientation.VERTICAL);
@@ -44,44 +50,51 @@ public class DSLPreviewApp extends Application {
         rightPane.setDividerPositions(0.75);
 
         SplitPane rootPane = new SplitPane();
-        rootPane.getItems().addAll(dslEditor, rightPane);
+        rootPane.getItems().addAll(editorTabs, rightPane);
         rootPane.setDividerPositions(0.35);
         rootPane.setPadding(new Insets(10));
 
-        dslEditor.textProperty().addListener((obs, oldText, newText) -> saveDSLAndUpdate());
-
-        stage.setTitle("DSL Editor + Live Preview + Errors");
+        stage.setTitle("DSL Tabbed Editor + Live Preview");
         stage.setScene(new Scene(rootPane, 1200, 700));
         stage.show();
 
-        runMontiCoreParser();
-        loadHtml();
+        runMontiCoreParser(PAGES[0]);
+        loadHtml(PAGES[0]);
         loadErrors();
+
+        editorTabs.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+            String page = newTab.getText();
+            runMontiCoreParser(page);
+            loadHtml(page);
+        });
     }
 
-    private void loadDSLSource() {
+    private void loadDSLSource(String page) {
+        Path path = DSL_DIR.resolve(page + ".ui");
         try {
-            String code = Files.readString(DSL_PATH);
-            dslEditor.setText(code);
+            String code = Files.readString(path);
+            dslEditors.get(page).setText(code);
         } catch (IOException e) {
-            dslEditor.setText("View {\n  VStack {\n    Text(\"Hello\")\n  }\n}\n");
+            dslEditors.get(page).setText("View {\n  VStack {\n    Text(\"Welcome\")\n  }\n}\n");
         }
     }
 
-    private void saveDSLAndUpdate() {
+    private void saveDSLAndUpdate(String page) {
+        Path path = DSL_DIR.resolve(page + ".ui");
         try {
-            Files.writeString(DSL_PATH, dslEditor.getText());
-            runMontiCoreParser();
-            loadHtml();
+            Files.writeString(path, dslEditors.get(page).getText());
+            runMontiCoreParser(page);
+            loadHtml(page);
             loadErrors();
         } catch (IOException e) {
             errorViewer.setText("❌ Failed to write .ui file: " + e.getMessage());
         }
     }
 
-    private void loadHtml() {
+    private void loadHtml(String page) {
+        Path htmlPath = HTML_DIR.resolve(page + ".html");
         try {
-            String html = Files.readString(HTML_PATH);
+            String html = Files.readString(htmlPath);
             webView.getEngine().loadContent(html, "text/html");
         } catch (IOException e) {
             webView.getEngine().loadContent("<h1>Could not load HTML</h1><p>" + e.getMessage() + "</p>");
@@ -97,13 +110,15 @@ public class DSLPreviewApp extends Application {
         }
     }
 
-    private void runMontiCoreParser() {
+    private void runMontiCoreParser(String page) {
+        Path dslPath = DSL_DIR.resolve(page + ".ui");
+        Path htmlPath = HTML_DIR.resolve(page + ".html");
         try {
             ProcessBuilder pb = new ProcessBuilder(
                 "java", "-jar", "src/tools/monticore-cli.jar",
                 "-g", "dsl/grammars/FrontendDSL.mc4",
-                "-i", DSL_PATH.toString(),
-                "-o", HTML_PATH.toString()
+                "-i", dslPath.toString(),
+                "-o", htmlPath.toString()
             );
             pb.inheritIO().start().waitFor();
         } catch (Exception e) {
