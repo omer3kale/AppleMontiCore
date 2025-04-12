@@ -11,7 +11,7 @@ public class VisitorTestRunner {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         if (args.length == 0) {
-            System.out.println("Usage: java VisitorTestRunner <file.ui-test>");
+            System.out.println("Usage: java VisitorTestRunner <file.ui-test | folder>");
             return;
         }
 
@@ -21,6 +21,22 @@ public class VisitorTestRunner {
             return;
         }
 
+        if (Files.isDirectory(input)) {
+            Files.list(input)
+                .filter(p -> p.toString().endsWith(".ui-test"))
+                .forEach(p -> {
+                    try {
+                        processFile(p);
+                    } catch (Exception e) {
+                        System.err.println("Error processing " + p + ": " + e.getMessage());
+                    }
+                });
+        } else {
+            processFile(input);
+        }
+    }
+
+    private static void processFile(Path input) throws IOException, InterruptedException {
         VisitorTestDSLParser parser = new VisitorTestDSLParser();
         Optional<ASTVisitorTestFile> astOpt = parser.parse(input.toString());
 
@@ -33,9 +49,10 @@ public class VisitorTestRunner {
         String javaTest = SwiftStyleTestExporter.exportJUnit(ast);
         String swiftTest = SwiftStyleTestExporter.exportSwiftTest(ast);
 
+        String baseName = input.getFileName().toString().replace(".ui-test", "");
         Path outputDir = Paths.get("output");
-        Path javaOut = outputDir.resolve("GeneratedVisitorTests.java");
-        Path swiftOut = outputDir.resolve("VisitorTests.swift");
+        Path javaOut = outputDir.resolve("Generated" + baseName + "Test.java");
+        Path swiftOut = outputDir.resolve(baseName + "Tests.swift");
 
         Files.createDirectories(outputDir);
         Files.writeString(javaOut, javaTest);
@@ -46,23 +63,10 @@ public class VisitorTestRunner {
         System.out.println("- " + swiftOut.toAbsolutePath());
 
         // Compile the Java test file
-        System.out.println("🛠️ Compiling Java test...");
+        System.out.println("🛠️ Compiling " + javaOut.getFileName() + "...");
         Process compile = new ProcessBuilder("javac", javaOut.toString())
             .inheritIO()
             .start();
         compile.waitFor();
-
-        // Run test using junit-platform-console if available
-        if (Files.exists(Paths.get("output/GeneratedVisitorTests.class"))) {
-            System.out.println("🚀 Running tests:");
-            new ProcessBuilder("java", "-cp", "output:.", "org.junit.platform.console.ConsoleLauncher",
-                    "--scan-classpath", "output",
-                    "--include-classname", ".*GeneratedVisitorTests")
-                .inheritIO()
-                .start()
-                .waitFor();
-        } else {
-            System.out.println("⚠️ Skipped test run (class not found)");
-        }
     }
 }
