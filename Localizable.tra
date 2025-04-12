@@ -1,0 +1,5 @@
+translations {
+  welcome = "Willkommen!";
+  noMatches = "Es gibt keine Übereinstimmungen.";
+  retry = "Versuch es nochmal.";
+}
