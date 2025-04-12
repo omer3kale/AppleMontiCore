@@ -4,15 +4,20 @@ grammar ViewDSL {
 
   ViewDef = "View" Name "{" Component* "}";
 
-  Component = VStack | Text | TextField | Button;
+  Component = VStack | HStack | Text | TextField | Button | Image | NavigationLink;
 
   VStack = "VStack" "{" Component* "}";
+  HStack = "HStack" "{" Component* "}";
   Text = "Text" "(" STRING ")";
 
   TextField = "TextField" "(" "name:" Name "," "placeholder:" STRING ")";
 
   Button = "Button" "(" STRING ")" ActionBlock;
   ActionBlock = "{" "action" "=" STRING ";"? "}";
+
+  Image = "Image" "(" "src:" STRING "," "alt:" STRING ")";
+
+  NavigationLink = "NavigationLink" "(" "label:" STRING "," "target:" Name ")";
 
   Name = /[a-zA-Z_][a-zA-Z0-9_]*/;
   STRING = /"[^"\\]*(\\.[^"\\]*)*"/;
