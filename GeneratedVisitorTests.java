@@ -18,4 +18,13 @@ public class GeneratedVisitorTests {
     assertTrue(node.getSTRING().contains("Click"));
   }
 
+  @Test
+  public void testTextFieldVisit() {
+    ASTTextField node = new ASTTextField();
+    node.setName("state");
+    node.setSTRING("Type...");
+    assertEquals("state", node.getName());
+    assertEquals("Type...", node.getSTRING());
+  }
+
 }
