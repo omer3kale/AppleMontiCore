@@ -16,6 +16,7 @@ export default function FootballSimulation() {
   const [currentState, setCurrentState] = useState('KickOff');
   const [log, setLog] = useState([]);
   const [score, setScore] = useState(0);
+  const [showTrophy, setShowTrophy] = useState(false);
 
   const handleEvent = (event) => {
     const transition = transitions.find(
@@ -24,7 +25,12 @@ export default function FootballSimulation() {
     if (transition) {
       setCurrentState(transition.to);
       setLog(log => [...log, `✅ ${transition.from} → ${transition.to} on '${event}'`]);
-      if (event === 'scoreGoal') setScore(s => s + 1);
+      if (event === 'scoreGoal') {
+        setScore(s => s + 1);
+        setShowTrophy(true);
+        new Audio('/assets/goal.mp3').play().catch(() => {});
+        setTimeout(() => setShowTrophy(false), 2000);
+      }
     } else {
       setLog(log => [...log, `❌ No transition from ${currentState} on '${event}'`]);
     }
@@ -34,14 +40,19 @@ export default function FootballSimulation() {
     setCurrentState('KickOff');
     setLog(["🔄 Reset to KickOff"]);
     setScore(0);
+    setShowTrophy(false);
   };
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <div className="flex flex-col items-center gap-8 relative">
       <div className="text-center">
         <h2 className="text-xl font-semibold mb-1">🏆 Scoreboard</h2>
         <p className="text-lg">Score: <span className="font-bold text-blue-600">{score}</span></p>
       </div>
+
+      {showTrophy && (
+        <div className="absolute top-6 right-6 animate-bounce text-4xl">🏆</div>
+      )}
 
       <FootballAutomatonGame
         states={states}
