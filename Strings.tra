@@ -1,0 +1,13 @@
+translations {
+  en {
+    welcome = "Welcome";
+    logout = "Log out";
+    confirmDelete = "Are you sure you want to delete %@?";
+  }
+
+  tr {
+    welcome = "Hoşgeldiniz";
+    logout = "Çıkış yap";
+    confirmDelete = "Silmek istediğinizden emin misiniz %@?";
+  }
+}
