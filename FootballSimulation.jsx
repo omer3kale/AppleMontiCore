@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import FootballAutomatonGame from './FootballAutomatonGame';
 import Football2DGame from './Football2DGame';
 
@@ -17,6 +17,12 @@ export default function FootballSimulation() {
   const [log, setLog] = useState([]);
   const [score, setScore] = useState(0);
   const [showTrophy, setShowTrophy] = useState(false);
+  const goalAudio = useRef(null);
+
+  useEffect(() => {
+    goalAudio.current = new Audio('/assets/goal.mp3');
+    goalAudio.current.load();
+  }, []);
 
   const handleEvent = (event) => {
     const transition = transitions.find(
@@ -28,7 +34,7 @@ export default function FootballSimulation() {
       if (event === 'scoreGoal') {
         setScore(s => s + 1);
         setShowTrophy(true);
-        new Audio('/assets/goal.mp3').play().catch(() => {});
+        goalAudio.current?.play().catch(() => {});
         setTimeout(() => setShowTrophy(false), 2000);
       }
     } else {
