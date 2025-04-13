@@ -46,9 +46,30 @@ public class ViewToJSXExporter {
     if (comp instanceof ASTButton b) return "<button onClick={() => " + cleanExpr(b.getActionBlock().getSTRING()) + "}>" + b.getSTRING() + "</button>";
     if (comp instanceof ASTTextField tf) return "<input name=\"" + tf.getName() + "\" placeholder=\"" + tf.getSTRING() + "\" value={" + tf.getName() + "} onChange={e => set" + capitalize(tf.getName()) + "(e.target.value)} />";
     if (comp instanceof ASTNavigationLink nl) return "<a href=\"" + nl.getTarget() + "\">" + nl.getLabel() + "</a>";
+    if (comp instanceof ASTIncludeView inc) return includeComponent(inc);
     if (comp instanceof ASTVStack vs) return wrapBlock("div", "flex flex-col gap-2", vs.getComponentList());
     if (comp instanceof ASTHStack hs) return wrapBlock("div", "flex flex-row gap-2", hs.getComponentList());
     return "";
+  }
+
+  private static String includeComponent(ASTIncludeView inc) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("<").append(inc.getName());
+    if (inc.isPresentParamBlock()) {
+      List<ASTParam> params = inc.getParamBlock().get().getParamList();
+      for (ASTParam p : params) {
+        sb.append(" ").append(p.getName()).append("=");
+        if (p.isPresentSTRING()) {
+          sb.append("\"").append(p.getSTRING().replace("\"", "")).append("\"");
+        } else if (p.isPresentNUMBER()) {
+          sb.append(p.getNUMBER());
+        } else if (p.isPresentBOOLEAN()) {
+          sb.append(p.getBOOLEAN());
+        }
+      }
+    }
+    sb.append(" />");
+    return sb.toString();
   }
 
   private static String wrapBlock(String tag, String className, List<ASTComponent> children) {
