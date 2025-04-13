@@ -12,6 +12,7 @@ Layer	Purpose
 ✅ Swift UI	Render to users in friendly form
 
 🧠 Your Key Design Principle
+
 💬 Natural Language DSL + Codable Swift Logic = Human-readable app
 
 Let’s walk through your integration setup.
