@@ -44,10 +44,7 @@ You now have:
 
     plaintext
 
-
-
 View HomePage
-
 attributes {
   route = "/home";
 } state {
