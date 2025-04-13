@@ -1,12 +1,26 @@
-<dependencies>
-  <dependency>
-    <groupId>org.openjfx</groupId>
-    <artifactId>javafx-controls</artifactId>
-    <version>17.0.2</version>
-  </dependency>
-  <dependency>
-    <groupId>org.openjfx</groupId>
-    <artifactId>javafx-web</artifactId>
-    <version>17.0.2</version>
-  </dependency>
-</dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.omer3kale</groupId> <!-- Replace with your group ID -->
+    <artifactId>apple-monticore</artifactId>  <!-- Replace with your artifact ID -->
+    <version>7.7.0-SNAPSHOT</version>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub omer3kale Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/omer3kale/AppleMontiCore</url> <!-- Replace OWNER and REPOSITORY -->
+        </repository>
+    </distributionManagement>
+
+    <dependencies>
+        <!-- Add your dependencies here -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+    </dependencies>
+</project>
