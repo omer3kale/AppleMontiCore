@@ -42,9 +42,13 @@ You now have:
 
 ✅ Yes — you're on the right track. Defining DSL syntax like:
 
-plaintext
+    plaintext
 
-View HomePage attributes {
+
+
+View HomePage
+
+attributes {
   route = "/home";
 } state {
   name: String;
