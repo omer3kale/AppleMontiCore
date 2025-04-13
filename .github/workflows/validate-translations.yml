@@ -1,0 +1,33 @@
+name: Validate .tra Translations
+
+on:
+  push:
+    paths:
+      - '**/*.tra'
+  workflow_dispatch:
+
+jobs:
+  validate-translations:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build MontiCore Project
+        run: mvn clean install -DskipTests
+
+      - name: Compile Validator
+        run: |
+          mkdir -p output
+          javac -cp target/classes -d output src/main/java/de/translation/exporter/TranslationValidator.java
+
+      - name: Run .tra Key Consistency Validator
+        run: |
+          java -cp target/classes:output de.translation.exporter.TranslationValidator
