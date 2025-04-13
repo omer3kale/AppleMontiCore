@@ -40,6 +40,18 @@ export default function FootballAutomatonGame() {
       <h1 className="text-2xl font-bold mb-2">🏟️ Football Automaton</h1>
       <p className="text-sm text-gray-500 mb-4">Simulate a game using finite-state logic</p>
 
+      {/* State Flow Diagram */}
+      <div className="flex justify-between items-center mb-4 px-2 text-sm text-gray-700">
+        {states.map(state => (
+          <div
+            key={state}
+            className={`px-2 py-1 rounded border ${state === currentState ? 'bg-blue-500 text-white font-bold' : 'bg-gray-100'}`}
+          >
+            {state}
+          </div>
+        ))}
+      </div>
+
       <div className="text-xl mb-2">Current State: <span className="font-mono text-blue-600">{currentState}</span></div>
 
       <div className="flex flex-wrap gap-2 justify-center my-4">
