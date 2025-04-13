@@ -47,10 +47,14 @@ You now have:
 View HomePage
 attributes {
   route = "/home";
-} state {
+} 
+
+state {
   name: String;
   count: Number;
-} {
+} 
+
+{
   VStack {
     TextField(name: name, placeholder: "Enter your name")
     Text("Welcome {{name}}")
