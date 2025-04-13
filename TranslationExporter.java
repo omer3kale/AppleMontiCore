@@ -2,6 +2,7 @@ package de.translation.exporter;
 
 import de.monticore.translationdsl._parser.TranslationDSLParser;
 import de.monticore.translationdsl._ast.*;
+import de.translation.visitor.TranslationVisitor;
 
 import java.io.*;
 import java.nio.file.*;
@@ -23,14 +24,13 @@ public class TranslationExporter {
     }
 
     ASTTranslationFile ast = optAst.get();
+    TranslationVisitor visitor = new TranslationVisitor();
+    ast.accept(visitor);
 
-    for (ASTLangBlock langBlock : ast.getLangBlockList()) {
-      String lang = langBlock.getLanguage();
-      Map<String, String> translations = new LinkedHashMap<>();
+    Map<String, Map<String, String>> allTranslations = visitor.getTranslations();
 
-      for (ASTTranslation t : langBlock.getTranslationList()) {
-        translations.put(t.getKey(), t.getSTRING().replaceAll("^\"|\"$", ""));
-      }
+    for (String lang : allTranslations.keySet()) {
+      Map<String, String> translations = allTranslations.get(lang);
 
       // Export JSON
       Path jsonFile = outputDir.resolve(lang + ".json");
@@ -45,7 +45,7 @@ public class TranslationExporter {
         writer.write("}\n");
       }
 
-      // Export .strings (iOS)
+      // Export .strings
       Path stringsFile = outputDir.resolve(lang + ".strings");
       try (BufferedWriter writer = Files.newBufferedWriter(stringsFile)) {
         for (Map.Entry<String, String> entry : translations.entrySet()) {
