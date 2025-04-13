@@ -1,0 +1,12 @@
+website SinglePage {
+
+  start page Home {
+    "This could be your ad!";
+    content {
+      -> Home;
+      "Lorem Ipsum";
+      "Lorem ipsa";
+    }
+  }
+
+}

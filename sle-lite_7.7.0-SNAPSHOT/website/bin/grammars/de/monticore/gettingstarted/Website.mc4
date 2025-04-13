@@ -1,0 +1,10 @@
+/* (c) https://github.com/MontiCore/monticore */
+package de.monticore.gettingstarted;
+
+grammar Website extends de.monticore.literals.MCCommonLiterals {
+
+  symbol scope Website = "website" Name;
+
+  // TODO define the grammar
+
+}

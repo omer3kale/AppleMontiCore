@@ -1,0 +1,17 @@
+website NavigationReferencesInaccessiblePage {
+
+  navigation {
+    Home2;
+  }
+
+  start page Home {         // start page
+                            // optional title not used
+    content {
+      pic Logo 167 x 40;    // a picture, file: Logo.png (always png) and scaled to size 300x200px)
+      "Lorem Ipsum";        // text
+      -> Staff;             // link to other page
+      "Lorem ipsa";         // more text
+    }
+  }
+
+}
