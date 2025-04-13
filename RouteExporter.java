@@ -11,7 +11,6 @@ public class RouteExporter {
     sb.append("import React from 'react';\n");
     sb.append("import { BrowserRouter, Routes, Route } from 'react-router-dom';\n\n");
 
-    // import components
     for (ASTViewDef view : views) {
       sb.append("import ").append(view.getName()).append(" from './").append(view.getName()).append("';\n");
     }
@@ -22,20 +21,31 @@ public class RouteExporter {
 
     for (ASTViewDef view : views) {
       if (view.isPresentViewAttrs()) {
-        for (ASTViewAttr attr : view.getViewAttrs().getViewAttrList()) {
-          if (attr.getName().equals("route")) {
-            sb.append("        <Route path=\"")
-              .append(attr.getSTRING().replaceAll("\"", ""))
-              .append("\" element={<")
-              .append(view.getName());
-            if (view.isPresentPropDef()) {
-              sb.append(" ");
-              for (ASTPropVar p : view.getPropDef().getPropVarList()) {
-                sb.append(p.getName()).append("=\"TODO\" ");
-              }
+        Optional<String> routePath = view.getViewAttrs().getViewAttrList().stream()
+          .filter(attr -> attr.getName().equals("route"))
+          .map(attr -> attr.getSTRING().replaceAll("\"", ""))
+          .findFirst();
+
+        if (routePath.isPresent()) {
+          sb.append("        <Route path=\"")
+            .append(routePath.get())
+            .append("\" element={<")
+            .append(view.getName());
+
+          // Simulate static props for JSX injection if available
+          if (view.isPresentPropDef()) {
+            sb.append(" ");
+            for (ASTPropVar p : view.getPropDef().getPropVarList()) {
+              String sample = switch (p.getTypeName()) {
+                case "String" -> "\"Sample\"";
+                case "Number" -> "42";
+                case "Boolean" -> "true";
+                default -> "undefined";
+              };
+              sb.append(p.getName()).append("=").append(sample).append(" ");
             }
-            sb.append("/>" + ")" + ";\n");
           }
+          sb.append("/>" + ")" + ";\n");
         }
       }
     }
