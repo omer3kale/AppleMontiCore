@@ -42,8 +42,6 @@ You now have:
 
 ✅ Yes — you're on the right track. Defining DSL syntax like:
 
-    plaintext
-
 View HomePage
 attributes {
   route = "/home";
