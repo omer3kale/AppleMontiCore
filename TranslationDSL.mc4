@@ -1,0 +1,13 @@
+grammar TranslationDSL {
+
+  TranslationFile = "translations" "{" LangBlock* "}";
+
+  LangBlock = Language "{" Translation* "}";
+  Language = /[a-z]{2}/; // ISO 639-1, e.g., en, tr, de
+
+  Translation = Key "=" STRING ";";
+
+  Key = /[a-zA-Z_][a-zA-Z0-9_]*/;
+  STRING = /"[^"\\]*(\\.[^"\\]*)*"/;
+
+}
