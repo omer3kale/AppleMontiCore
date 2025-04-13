@@ -26,14 +26,22 @@ export default function FootballAutomatonGame() {
     }
   };
 
+  const resetAutomaton = () => {
+    setCurrentState('KickOff');
+    setLog(["🔄 Reset to KickOff"]);
+  };
+
   const availableEvents = transitions
     .filter(t => t.from === currentState)
     .map(t => t.event);
 
   return (
-    <div className="p-4 max-w-xl mx-auto text-center">
-      <h1 className="text-2xl font-bold mb-4">🏟️ Football Automaton</h1>
+    <div className="p-4 max-w-xl mx-auto text-center border rounded-xl shadow bg-white">
+      <h1 className="text-2xl font-bold mb-2">🏟️ Football Automaton</h1>
+      <p className="text-sm text-gray-500 mb-4">Simulate a game using finite-state logic</p>
+
       <div className="text-xl mb-2">Current State: <span className="font-mono text-blue-600">{currentState}</span></div>
+
       <div className="flex flex-wrap gap-2 justify-center my-4">
         {availableEvents.map(event => (
           <button
@@ -44,7 +52,14 @@ export default function FootballAutomatonGame() {
             {event}
           </button>
         ))}
+        <button
+          className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
+          onClick={resetAutomaton}
+        >
+          Reset
+        </button>
       </div>
+
       <div className="text-left mt-4 bg-gray-100 p-3 rounded h-48 overflow-y-auto text-sm font-mono">
         {log.map((entry, i) => (
           <div key={i}>{entry}</div>
