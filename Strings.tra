@@ -10,4 +10,10 @@ translations {
     logout = "Çıkış yap";
     confirmDelete = "Silmek istediğinizden emin misiniz %@?";
   }
+
+de {
+    welcome = "Willkommen";
+    logout = "Ausloggen";
+    confirmDelete = "Möchten Sie wirklich löschen %@?";
+  }
 }
