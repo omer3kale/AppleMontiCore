@@ -39,9 +39,7 @@ You now have:
 ✅ Write and validate .tra DSLs
 ✅ Auto-generate Swift code from them
 ✅ Run everything in one command
-✅ Edit in VS Code with live feedback
 
-✅ Yes — you're on the right track. Defining DSL syntax like:
 
 View HomePage
 attributes {
